@@ -166,6 +166,7 @@
         <div class="form-header" style="margin-top: 10px;">
             <span>Год</span>
             <span>После выпуска</span>
+            <span>Страна</span>
             <span>Компания</span>
             <span>Зарплата</span>
         </div>
@@ -215,16 +216,6 @@
             "Кафедра Автоматизации систем вычислительных комплексов",
             "Кафедра Суперкомпьютеров и квантовой информатики",
             "Кафедра Интеллектуальных информационных технологий"
-        ];
-
-        // Порядок по умолчанию
-        const initialCoursesList = [
-            "1 курс бакалавриата",
-            "2 курс бакалавриата",
-            "3 курс бакалавриата",
-            "4 курс бакалавриата",
-            "1 курс магистратуры",
-            "2 курс магистратуры"
         ];
 
         // Диапазон годов
@@ -316,12 +307,12 @@
             row.classList.add('form-row');
 
             row.innerHTML = `
-                <select class=\"year-select\">${createOptions(years)}</select>
-                <select class=\"course-select\">${createOptions(allCourses)}</select>
-                <span class=\"dept-wrapper\"></span>
-                <input type=\"text\" class=\"company-input\" placeholder=\"Компания\" />
-                <input type=\"number\" placeholder=\"Зарплата\" />
-                <button class=\"delete-btn\" onclick=\"removeRow(this)\">🗑</button>
+                <select class="year-select">${createOptions(years)}</select>
+                <select class="course-select">${createOptions(allCourses)}</select>
+                <span class="dept-wrapper"></span>
+                <input type="text" class="company-input" placeholder="Компания" />
+                <input type="number" placeholder="Зарплата" />
+                <button class="delete-btn" onclick="removeRow(this)">🗑</button>
             `;
 
             container.appendChild(row);
@@ -341,34 +332,39 @@
             // Рендерим кафедру
             renderDeptElement(deptWrapper, nextCourse, nextDept);
 
-            // Изменение кафедры при смене курса
+            // При смене курса меняем кафедру
             courseSel.addEventListener('change', () => {
                 renderDeptElement(deptWrapper, courseSel.value);
             });
         }
 
-        // Добавляем новую строку (ПОСЛЕ ВЫПУСКА) и дублируем "Компания" и "Зарплата" из последней заполненной
+        // Добавляем новую строку (ПОСЛЕ ВЫПУСКА) и дублируем "Страна" и "Компания"/"Зарплата" из последней заполненной
         function addPostGraduationRow(yearParam = null) {
             const container = document.getElementById('post-graduation-list');
             const last = container.lastElementChild;
 
             let nextYear = 2018;
-            let lastSalaryVal = '';
+            let lastCountryVal = '';
             let lastCompanyVal = '';
+            let lastSalaryVal = '';
 
             if (last) {
                 const yearSel = last.querySelector('.year-select');
-                const lastSalaryInput = last.querySelector("input[type='number']");
-                const lastCompanyInput = last.querySelector('.company-input');
+                const countryInput = last.querySelector('.country-input');
+                const companyInput = last.querySelector('.company-input');
+                const salaryInput = last.querySelector("input[type='number']");
 
                 if (yearSel) {
                     nextYear = parseInt(yearSel.value) + 1;
                 }
-                if (lastSalaryInput) {
-                    lastSalaryVal = lastSalaryInput.value;
+                if (countryInput) {
+                    lastCountryVal = countryInput.value;
                 }
-                if (lastCompanyInput) {
-                    lastCompanyVal = lastCompanyInput.value;
+                if (companyInput) {
+                    lastCompanyVal = companyInput.value;
+                }
+                if (salaryInput) {
+                    lastSalaryVal = salaryInput.value;
                 }
             } else if (yearParam !== null) {
                 nextYear = yearParam;
@@ -377,22 +373,25 @@
             const row = document.createElement('div');
             row.classList.add('form-row');
             row.innerHTML = `
-                <select class=\"year-select\">${createOptions(years)}</select>
-                <input type=\"text\" class=\"after-release\" value=\"Выпускник\" readonly />
-                <input type=\"text\" class=\"company-input\" placeholder=\"Компания\" />
-                <input type=\"number\" placeholder=\"Зарплата\" />
-                <button class=\"delete-btn\" onclick=\"removeRow(this)\">🗑</button>
+                <select class="year-select">${createOptions(years)}</select>
+                <input type="text" class="after-release" value="Выпускник" readonly />
+                <input type="text" class="country-input" placeholder="Страна" />
+                <input type="text" class="company-input" placeholder="Компания" />
+                <input type="number" placeholder="Зарплата" />
+                <button class="delete-btn" onclick="removeRow(this)">🗑</button>
             `;
 
             container.appendChild(row);
 
             const yearSel = row.querySelector('.year-select');
+            const countryInp = row.querySelector('.country-input');
             const salaryInp = row.querySelector("input[type='number']");
             const companyInp = row.querySelector('.company-input');
 
             yearSel.value = nextYear;
-            salaryInp.value = lastSalaryVal;
+            countryInp.value = lastCountryVal;
             companyInp.value = lastCompanyVal;
+            salaryInp.value = lastSalaryVal;
         }
 
         function removeRow(btn) {
@@ -467,12 +466,14 @@
             postRows.forEach(row => {
                 const year = row.querySelector('.year-select').value;
                 const status = row.querySelector('.after-release').value;
+                const country = row.querySelector('.country-input').value;
                 const comp = row.querySelector('.company-input').value;
                 const salary = row.querySelector("input[type='number']").value;
 
                 userData.postGraduation.push({
                     year,
                     status,
+                    country,
                     company: comp,
                     salary
                 });
